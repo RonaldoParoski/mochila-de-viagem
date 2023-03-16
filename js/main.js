@@ -1,5 +1,6 @@
-const form = document.getElementById('novoItem');
-const lista = document.getElementById("lista")
+
+const form = document.querySelector('#novoItem')
+const lista = document.querySelector('.lista')
 
 form.addEventListener("submit", (evento) => {
     evento.preventDefault() //interrompe que os dados fiquem na pagina 
@@ -27,4 +28,3 @@ function criaElemento(nome, quantidade){
     lista.appendChild(novoItem)
 
 }
-
