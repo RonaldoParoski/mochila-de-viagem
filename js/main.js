@@ -1,52 +1,79 @@
-const form = document.querySelector('#novoItem')
-const lista = document.querySelector('.lista')
-// const itens = [] //array para armazenar o itens e armazenar no local storage
-const itens = JSON.parse(localStorage.getItem("itens")) || [] //consulta no localstorage se tem itens ou nao
+const form = document.getElementById("novoItem")
+const lista = document.getElementById("lista")
+const itens = JSON.parse(localStorage.getItem("itens")) || []
 
-itens.forEach((elemento) => {
+itens.forEach( (elemento) => {
     criaElemento(elemento)
-});
+} )
 
 form.addEventListener("submit", (evento) => {
-    evento.preventDefault() //interrompe que os dados fiquem na pagina 
+    evento.preventDefault()
 
-    const nome = evento.target.elements['nome'];
+    const nome = evento.target.elements['nome']
     const quantidade = evento.target.elements['quantidade']
 
+    const existe = itens.find( elemento => elemento.nome === nome.value )
 
-    const itemAtual = { //cria um objeto pra receber mais de um dado e armazenar no local storage
+    const itemAtual = {
         "nome": nome.value,
         "quantidade": quantidade.value
     }
 
-    criaElemento(itemAtual)
+    if (existe) {
+        itemAtual.id = existe.id
+        
+        atualizaElemento(itemAtual)
 
-    itens.push(itemAtual) //coloca os itens do array no json
+        itens[itens.findIndex(elemento => elemento.id === existe.id)] = itemAtual
+    } else {
+        itemAtual.id = itens[itens.length -1] ? (itens[itens.length-1]).id + 1 : 0;
 
-    localStorage.setItem("itens", JSON.stringify(itens)) //JSON.stringfy-> transforma um elemento em uma string
+        criaElemento(itemAtual)
+
+        itens.push(itemAtual)
+    }
+
+    localStorage.setItem("itens", JSON.stringify(itens))
 
     nome.value = ""
-    quantidade.value = "" // todas as vezes q enviar um novo cadastro ele limpa os campos do form
+    quantidade.value = ""
 })
 
-
-//FUNÇÃO QUE RECEBE OS CAMPOS DO FORM E CRIA O ITEM
 function criaElemento(item) {
+    const novoItem = document.createElement("li")
+    novoItem.classList.add("item")
 
-    // CRIA UM NOVO ITEM NA LISTA
-    const novoItem = document.createElement('li')
-    novoItem.classList.add("item") // PEGA A MESMA CLASSE DO LI DO HTML
-
-    // pega o numero que esta na quantidade
-    const numeroItem = document.createElement('strong')
+    const numeroItem = document.createElement("strong")
     numeroItem.innerHTML = item.quantidade
-
-    novoItem.appendChild(numeroItem) // appendChild coloca um elemento dentro do outro
+    numeroItem.dataset.id = item.id
+    novoItem.appendChild(numeroItem)
+    
     novoItem.innerHTML += item.nome
 
+    novoItem.appendChild(botaoDeleta(item.id))
+
     lista.appendChild(novoItem)
+}
 
-    // localStorage.setItem("nome", nome) //salva no local storage da pagina web o dado, como um banco
-    // localStorage.setItem("quantidade", quantidade)
+function atualizaElemento(item) {
+    document.querySelector("[data-id='"+item.id+"']").innerHTML = item.quantidade
+}
 
+function botaoDeleta(id) {
+    const elementoBotao = document.createElement("button")
+    elementoBotao.innerText = "X"
+
+    elementoBotao.addEventListener("click", function() {
+        deletaElemento(this.parentNode, id)
+    })
+
+    return elementoBotao
+}
+
+function deletaElemento(tag, id) {
+    tag.remove()
+
+    itens.splice(itens.findIndex(elemento => elemento.id === id), 1)
+
+    localStorage.setItem("itens", JSON.stringify(itens))
 }
